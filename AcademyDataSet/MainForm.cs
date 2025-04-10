@@ -58,8 +58,11 @@ namespace AcademyDataSet
             string[] tables = this.tables.ToArray();
             for (int i = 0; i < tables.Length; i++)
             {
+                ///////////////////////////////////////////////////////////////
+                //						* ???
                 string cmd = $"SELECT * FROM {tables[i].Split(',')[0]}";
-                SqlDataAdapter adapter = new SqlDataAdapter(cmd, connection);
+                ///////////////////////////////////////////////////////////////
+                SqlDataAdapter adapter = new SqlDataAdapter(cmd,connection);
                 adapter.Fill(GroupsRelatedData.Tables[tables[i].Split(',')[0]]);
             }
         }
@@ -130,40 +133,54 @@ $"{row[dst_Groups_col_group_id]}\t{row[dst_Groups_col_group_name]}\t{row.GetPare
             Console.WriteLine(table);
             string relation_name = "No relation";
             string parent_table_name = "";
+            string parent_column_name = "";
+            int parent_index = -1;
             if (hasParents(table))
             {
-                //relation_name = GroupsRelatedData.Tables[table].ParentRelations[0].RelationName.Substring(table.Length); 
-                parent_table_name = GroupsRelatedData.Tables[table].ParentRelations[0].ParentTable.TableName; 
-            Console.WriteLine(parent_table_name);
-            DataColumn parent_colums = GroupsRelatedData.Tables[parent_table_name].Columns["direction_name"];
-            //Console.WriteLine(parent_colums.GetType());
-            int parent_index = GroupsRelatedData.Tables[table].Columns.IndexOf("direction");
-            Console.WriteLine(parent_index);
+                relation_name = GroupsRelatedData.Tables[table].ParentRelations[0].RelationName;
+                parent_table_name = GroupsRelatedData.Tables[table].ParentRelations[0].ParentTable.TableName;
+                parent_column_name = parent_table_name.ToLower().Substring(0, parent_table_name.Length - 1) + "_name";
+                Console.WriteLine(parent_table_name);
+                //DataColumn parent_column = GroupsRelatedData.Tables[parent_table_name].Columns["direction_name"];
+                //Console.WriteLine(parent_column.ColumnName);
+                parent_index =
+                    GroupsRelatedData.Tables[table].Columns.
+                    IndexOf(parent_table_name.ToLower().Substring(0, parent_table_name.Length - 1));
+                Console.WriteLine(parent_index);
             }
             foreach (DataRow row in GroupsRelatedData.Tables[table].Rows)
             {
                 for (int i = 0; i < row.ItemArray.Length; i++)
                 {
-                    Console.Write(row[i].ToString() + "\t");
+                    if (i == parent_index)
+                    {
+                        DataRow parent_row = row.GetParentRow(relation_name);
+                        Console.Write(parent_row[parent_column_name]);
+                        //Console.Write(row.GetParentRow(relation_name)[parent_column_name]);
+                        //GroupsRelatedData.Tables;
+                    }
+                    else
+                        Console.Write(row[i].ToString() + "\t");
                     //Console.WriteLine(row[i].GetType());
                 }
-                if (hasParents(table))
-                {
-                    DataRow parent_row = row.GetParentRow(GroupsRelatedData.Tables[table].ParentRelations[0].RelationName);
-                    //for (int j = 0; j < parent_row.ItemArray.Length; j++)
-                    //Console.Write(parent_row[j] + "\t");
-                    Console.Write(parent_row["direction_name"]);
-                }  
+                //if (hasParents(table))
+                //{
+                //	DataRow parent_row = row.GetParentRow(GroupsRelatedData.Tables[table].ParentRelations[0].RelationName);
+                //	//for (int j = 0; j < parent_row.ItemArray.Length; j++)
+                //	//Console.Write(parent_row[j] + "\t");
+                //	Console.Write(parent_row["direction_name"]);
+                //}
                 Console.WriteLine();
-            Console.WriteLine("\n------------------------------------\n");
             }
+            Console.WriteLine("\n------------------------------------\n");
         }
         bool hasParents(string table)
         {
+
             return GroupsRelatedData.Tables[table].ParentRelations.Count > 0;
             //for (int i = 0; i < GroupsRelatedData.Relations.Count; i++)
             //{
-            //    if (GroupsRelatedData.Relations[i].ChildTable.TableName == table) return true;
+            //	if (GroupsRelatedData.Relations[i].ChildTable.TableName == table) return true;
             //}
             //return false;
         }
@@ -171,10 +188,25 @@ $"{row[dst_Groups_col_group_id]}\t{row[dst_Groups_col_group_name]}\t{row.GetPare
         {
             AddTable("Directions", "direction_id,direction_name");
             AddTable("Groups", "group_id,group_name,direction");
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!никогда не брать названия полей в квадратные скобки!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!никогда не брать названия полей в квадратные скобки!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!никогда не брать названия полей в квадратные скобки!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            AddTable("Students", "stud_id,last_name,first_name,middle_name,birth_date,group");
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!никогда не брать названия полей в квадратные скобки!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!никогда не брать названия полей в квадратные скобки!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!никогда не брать названия полей в квадратные скобки!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////
             AddRelation("GroupsDirections", "Groups,direction", "Directions,direction_id");
+            AddRelation("StudentsGroups", "Students,group", "Groups,group_id");
             Load();
             Print("Directions");
             Print("Groups");
+            Print("Students");
         }
         [DllImport("kernel32.dll")]
         public static extern bool AllocConsole();
