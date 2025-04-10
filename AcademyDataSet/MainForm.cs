@@ -127,24 +127,45 @@ $"{row[dst_Groups_col_group_id]}\t{row[dst_Groups_col_group_name]}\t{row.GetPare
         void Print(string table)
         {
             Console.WriteLine("\n------------------------------------\n");
-            Console.WriteLine(hasParents(table));
+            Console.WriteLine(table);
+            string relation_name = "No relation";
+            string parent_table_name = "";
+            if (hasParents(table))
+            {
+                //relation_name = GroupsRelatedData.Tables[table].ParentRelations[0].RelationName.Substring(table.Length); 
+                parent_table_name = GroupsRelatedData.Tables[table].ParentRelations[0].ParentTable.TableName; 
+            Console.WriteLine(parent_table_name);
+            DataColumn parent_colums = GroupsRelatedData.Tables[parent_table_name].Columns["direction_name"];
+            //Console.WriteLine(parent_colums.GetType());
+            int parent_index = GroupsRelatedData.Tables[table].Columns.IndexOf("direction");
+            Console.WriteLine(parent_index);
+            }
             foreach (DataRow row in GroupsRelatedData.Tables[table].Rows)
             {
                 for (int i = 0; i < row.ItemArray.Length; i++)
                 {
                     Console.Write(row[i].ToString() + "\t");
+                    //Console.WriteLine(row[i].GetType());
                 }
+                if (hasParents(table))
+                {
+                    DataRow parent_row = row.GetParentRow(GroupsRelatedData.Tables[table].ParentRelations[0].RelationName);
+                    //for (int j = 0; j < parent_row.ItemArray.Length; j++)
+                    //Console.Write(parent_row[j] + "\t");
+                    Console.Write(parent_row["direction_name"]);
+                }  
                 Console.WriteLine();
-            }
             Console.WriteLine("\n------------------------------------\n");
+            }
         }
         bool hasParents(string table)
         {
-            for (int i = 0; i < GroupsRelatedData.Relations.Count; i++)
-            {
-                if (GroupsRelatedData.Relations[i].ChildTable.TableName == table) return true;
-            }
-            return false;
+            return GroupsRelatedData.Tables[table].ParentRelations.Count > 0;
+            //for (int i = 0; i < GroupsRelatedData.Relations.Count; i++)
+            //{
+            //    if (GroupsRelatedData.Relations[i].ChildTable.TableName == table) return true;
+            //}
+            //return false;
         }
         void Check()
         {
