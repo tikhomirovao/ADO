@@ -60,7 +60,15 @@ namespace AcademyDataSet
             {
                 ///////////////////////////////////////////////////////////////
                 //						* ???
-                string cmd = $"SELECT * FROM {tables[i].Split(',')[0]}";
+                string columns = "";
+                DataColumnCollection column_collection = GroupsRelatedData.Tables[tables[i].Split(',')[0]].Columns;
+                foreach (DataColumn column in column_collection)
+                {
+                    columns += $"[{column.ColumnName}],";
+                }
+                columns = columns.Remove(columns.LastIndexOf(','));
+                Console.WriteLine(columns);
+                string cmd = $"SELECT {columns} FROM {tables[i].Split(',')[0]}";
                 ///////////////////////////////////////////////////////////////
                 SqlDataAdapter adapter = new SqlDataAdapter(cmd,connection);
                 adapter.Fill(GroupsRelatedData.Tables[tables[i].Split(',')[0]]);
