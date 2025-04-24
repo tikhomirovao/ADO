@@ -13,6 +13,7 @@ namespace ADO.NET
     {
         static void Main(string[] args)
         {
+#if INTRO
             //1) Берём строку подключения:
             const int PADDING = 30;
             //const string CONNECTION_STRING = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Movies;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
@@ -35,7 +36,7 @@ namespace ADO.NET
             if (reader.HasRows)
             {
                 Console.WriteLine("===================================================================================");
-                for (int i=0; i<reader.FieldCount;i++)
+                for (int i = 0; i < reader.FieldCount; i++)
                     Console.Write(reader.GetName(i).PadRight(PADDING));
                 Console.WriteLine();
                 Console.WriteLine("===================================================================================");
@@ -52,7 +53,15 @@ namespace ADO.NET
 
             //6) Закрываем SqlDataReader и Connection:
             reader.Close();
-            connection.Close();
+            connection.Close(); 
+#endif
+            //Connector.Select("*", "Directors");
+            //Connector.Select("title, release_date,FORMATMESSAGE(N'%s %s', first_name,last_name)", "Movies,Directors", "director = director_id");
+            //Connector.InsertDirector("Brian", "De Palma");
+            Connector.InsertMovie("Terminator 5 - Genesis", "2015.06.22", "1");
+            Connector.SelectDirectors();
+            Connector.SelectMovies();
         }
     }
 }
+
